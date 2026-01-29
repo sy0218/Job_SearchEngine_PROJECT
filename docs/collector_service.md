@@ -16,7 +16,7 @@
 |--------|------|
 | `collector.service` | systemd 유닛 파일 (서비스 관리) |
 | `collector.sh` | 환경 변수 로드 및 서비스 시작/중지 스크립트 |
-| `collector.py` | 도메인별 잡 실행 및 종료 감지 |
+| **`collector.py` (메인)** | 도메인별 잡 실행 및 종료 감지 |
 | `job.conf` | 환경 변수 설정 파일 |
 | `collector.properties` | 도메인/URL/XPath/스키마 설정 |
 | `config_log.py` | 로그 설정 (날짜별 파일 생성) |

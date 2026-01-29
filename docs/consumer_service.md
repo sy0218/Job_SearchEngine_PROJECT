@@ -20,7 +20,7 @@
 |--------|------|
 | `consumer.service` | systemd 유닛 파일 (서비스 관리) |
 | `consumer.sh` | 환경 변수 로드 및 서비스 시작/중지 스크립트 |
-| `consumer.py` | 멀티프로세스 기반 채용 공고 수집 및 전송 |
+| **`consumer.py` (메인)** | 멀티프로세스 기반 채용 공고 수집 및 전송 |
 | `job.conf` | 환경 변수 설정 파일 |
 | `consumer.properties` | 도메인/URL/XPath/이미지/NDJSON 저장 경로 설정 |
 | `config_log.py` | 로그 설정 (날짜별 파일 생성) |
