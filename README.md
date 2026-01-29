@@ -47,7 +47,7 @@
 |--------------|------------|----------|
 | **수집** | 📡 `collector.service` | 채용공고 **헤더 수집** → **[`📘 collector`](./docs/collector_service.md)** |
 | **처리** | 📦 `consumer.service` | 채용공고 헤더 **데이터 소비 및 상세 저장** → **[`📘 consumer`](./docs/consumer_service.md)** |
-| **처리** | 🚚 `hadoop_upload.service` | 로컬 데이터 병합 후 **HDFS 업로드** → **[`📘 hadoop_upload`](./job_all_md/hadoop_upload.md)** |
+| **처리** | 🚚 `hadoop_upload.service` | 로컬(NFS) 데이터 병합 후 **HDFS 업로드** → **[`📘 hadoop_upload`](./docs/hadoop_upload_service.md)** |
 | **처리** | 🕵️ `hadoop_txid.service` | HDFS Edits 로그 스캔 → 신규 TXID 추출 → DB 적재 → **[`📘 hadoop_txid`](./job_all_md/hadoop_txid.md)** |
 | **처리** | 🛢️ `warehouse.service` | **OCR 처리** 및 텍스트 정제 후 HDFS 업로드 → **[`📘 warehouse`](./job_all_md/warehouse.md)** |
 | **적재·검색** | 📤 `esupload.service` | HDFS Bulk 데이터 **Elasticsearch 전송** → **[`📘 esupload`](./job_all_md/esupload.md)** |
