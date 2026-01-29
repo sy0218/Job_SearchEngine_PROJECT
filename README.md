@@ -60,12 +60,13 @@
 
 | Category | Stack |
 |:--------:|:-----|
-| 💻 **프로그래밍 언어** | ![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=Python&logoColor=white) ![Shell Script](https://img.shields.io/badge/Shell%20Script-4EAA25?style=for-the-badge&logo=GNU%20Bash&logoColor=white) |
+| 💻 **프로그래밍 언어** | ![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=Python&logoColor=white) ![Shell Script](https://img.shields.io/badge/Shell%20Script-4EAA25?style=for-the-badge&logo=GNU%20Bash&logoColor=white) ![Java](https://img.shields.io/badge/Java-007396?style=for-the-badge&logo=Java&logoColor=white) |
 | ☁️ **인프라 & 가상화** | ![Linux](https://img.shields.io/badge/Linux-FCC624?style=for-the-badge&logo=Linux&logoColor=black) ![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=Docker&logoColor=white) ![KVM](https://img.shields.io/badge/KVM-FF6600?style=for-the-badge&logo=Linux&logoColor=white) |
-| 🗄 **빅데이터 & 저장소** | ![Hadoop](https://img.shields.io/badge/Apache%20Hadoop-66CCFF?style=for-the-badge&logo=Apache%20Hadoop&logoColor=black) ![Hive](https://img.shields.io/badge/Apache%20Hive-FDEE21?style=for-the-badge&logo=Apache%20Hive&logoColor=black) ![Elasticsearch](https://img.shields.io/badge/Elasticsearch-005571?style=for-the-badge&logo=Elasticsearch&logoColor=white) |
+| 🗄  **빅데이터 & 저장소** | ![Hadoop](https://img.shields.io/badge/Apache%20Hadoop-66CCFF?style=for-the-badge&logo=Apache%20Hadoop&logoColor=black) ![Hive](https://img.shields.io/badge/Apache%20Hive-FDEE21?style=for-the-badge&logo=Apache%20Hive&logoColor=black) ![Elasticsearch](https://img.shields.io/badge/Elasticsearch-005571?style=for-the-badge&logo=Elasticsearch&logoColor=white) |
 | ⚡ **메시징 & 캐시** | ![Kafka](https://img.shields.io/badge/Apache%20Kafka-231F20?style=for-the-badge&logo=Apache%20Kafka&logoColor=white) ![Redis](https://img.shields.io/badge/Redis-DC382D?style=for-the-badge&logo=Redis&logoColor=white) |
 | 🌍 **웹 크롤링** | ![Selenium](https://img.shields.io/badge/Selenium-43B02A?style=for-the-badge&logo=Selenium&logoColor=white) ![Scrapy](https://img.shields.io/badge/Scrapy-9E1510?style=for-the-badge&logo=Scrapy&logoColor=white) |
-| 🖼️ **OCR** | ![EasyOCR](https://img.shields.io/badge/EasyOCR-FF9900?style=for-the-badge&logo=python&logoColor=white) |
+| 🖼️  **OCR** | ![EasyOCR](https://img.shields.io/badge/EasyOCR-FF9900?style=for-the-badge&logo=python&logoColor=white) |
+| 🤖 **AI / LLM** | ![LLM](https://img.shields.io/badge/LLM-FF6F61?style=for-the-badge&logo=OpenAI&logoColor=white) |
 | 📊 **모니터링 도구** | ![Prometheus](https://img.shields.io/badge/Prometheus-263238?style=for-the-badge&logo=Prometheus&logoColor=white) ![Grafana](https://img.shields.io/badge/Grafana-F46800?style=for-the-badge&logo=Grafana&logoColor=white) |
 
 ---
