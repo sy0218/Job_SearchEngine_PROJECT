@@ -1,0 +1,4 @@
+[INFO ] [2026-01-30 00:00:01] [RUN] 로그 삭제 시작: /work/jsy/job_project/logs, 보관기간: 5일
+/work/jsy/job_project/logs/sync_time_clock_20260123_12.log
+/work/jsy/job_project/logs/collector_20260123.log
+[INFO ] [2026-01-30 00:00:01] [END] 로그 삭제 완료

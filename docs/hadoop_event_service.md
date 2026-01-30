@@ -22,6 +22,18 @@
 ---
 <br>
 
+## 🛠 컴파일 방법
+```bash
+# 하둡 라이브러리 및 PostgreSQL JDBC 포함하여 컴파일
+javac -classpath "$(hadoop classpath --glob):/work/jsy/lib/postgresql-42.7.3.jar" HdfsCloseWatcher.java
+```
+- `$(hadoop classpath --glob)` : 하둡 관련 모든 jar 포함
+- PostgreSQL JDBC jar 위치 지정 (`/work/jsy/lib/postgresql-42.7.3.jar`)
+- 컴파일 후 `.class` 파일이 생성되어 실행 가능
+
+---
+<br>
+
 ## ▶️ 서비스 동작 흐름
 ```plaintext
 systemd (hadoop_event.service)
