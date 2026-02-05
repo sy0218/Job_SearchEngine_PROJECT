@@ -51,6 +51,7 @@ class ChromeDriver:
         options.add_argument("--blink-settings=imagesEnabled=false")
         options.add_argument("--disable-logging")
         options.add_argument(f"user-agent={random.choice(user_agents)}")
+        options.add_argument("--window-size=1920,1080")
 
         options.add_experimental_option("excludeSwitches", ["enable-automation"])
         options.add_experimental_option("useAutomationExtension", False)
@@ -64,11 +65,32 @@ class ChromeDriver:
         """
         try:
             WebDriverWait(self.driver, timeout).until(
-                EC.presence_of_element_located((By.CSS_SELECTOR, element))
+                EC.presence_of_element_located((By.CSS_SELECTOR, f"{element}:last-child"))
             )
         except TimeoutException:
             logger.error(f"CSS 로딩 타임아웃: {element}")
             raise
+
+    def wait_xpath(self, element, timeout):
+        """
+        XPATH Selector 기준 엘리먼트 로딩 대기
+        """
+        try:
+            WebDriverWait(self.driver, timeout).until(
+                EC.presence_of_element_located((By.XPATH, element))
+            )
+        except TimeoutException:
+            logger.error(f"XPATH 로딩 타임아웃: {element}")
+            raise
+
+    def click_xpath(self, element):
+        self.driver.find_element(By.XPATH, element).click()
+        logger.info(f"XPATH 클릭 성공: {element}")
+
+    def Jobplanet_Auto_Mation(self, selectors, timeout):
+        for select in selectors:
+            self.wait_xpath(select, timeout)
+            self.click_xpath(select)
 
     def autoscroll(self, element, timeout, sleep_sec, max_retry):
         """
@@ -152,16 +174,19 @@ class JobParser:
         return: {domain, href, company, title}
         """
         href = self.response.urljoin(
-            job_html.xpath(href_path).get()
-        )
-        company = job_html.xpath(company_path).get()
-        title = job_html.xpath(title_path).get()
+            job_html.xpath(href_path).get() or ""
+        ).strip()
+        company = (job_html.xpath(company_path).get() or "").strip()
+        title = (job_html.xpath(title_path).get() or "").strip()
 
+        if not (href and company and title):
+            logger.warning(job_html.get())
+            raise ValueError(f"데이터 누락 발생..! (href: {href}, company: {company}, title: {title})")
         job_data = {
             "domain": domain,
-            "href": href.strip(),
-            "company": company.strip(),
-            "title": title.strip()
+            "href": href,
+            "company": company,
+            "title": title
         }
 
         return job_data
@@ -197,7 +222,7 @@ class JobParser:
             'deadline': ['마감일'],
             'type': ['직급', '직책']
         }
-        
+
         if domain == "remember":
             for field, keywords in fields.items():
                 banner[field] = None
@@ -258,4 +283,3 @@ class JobParser:
                 continue
 
         return img_lst
-        

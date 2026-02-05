@@ -1,13 +1,14 @@
-## 컬렉터 ##
+## 컬렉터 ( daemon service ) ##
 docker run -d -it \
   --name collector \
   -v /etc/localtime:/etc/localtime:ro \
   -v /etc/timezone:/etc/timezone:ro \
+  -v /work/jsy/job_project/logs:/work/job_project/logs \
   collector:v1 \
   /bin/bash
 
 
-## 컨슈머 ##
+## 컨슈머 ( daemon service ) ##
 docker run -d -it \
   --name consumer \
   -v /etc/localtime:/etc/localtime:ro \
@@ -17,7 +18,7 @@ docker run -d -it \
   /bin/bash
 
 
-## OCR ##
+## OCR ( daemon service ) ##
 docker run -d -it \
   --name ocr \
   -v /etc/localtime:/etc/localtime:ro \
@@ -27,7 +28,7 @@ docker run -d -it \
   /bin/bash
 
 
-## 웨어하우스 ##
+## 웨어하우스 ( daemon service ) ##
 docker run -d -it \
   --name warehouse \
   -v /etc/localtime:/etc/localtime:ro \
@@ -36,6 +37,18 @@ docker run -d -it \
   -v /etc/hosts:/etc/hosts:ro \
   -v /application/hadoop:/application/hadoop:ro \
   warehouse:v1 \
+  /bin/bash
+
+
+## 엘라스틱서치 업로드( daemon service ) ##
+docker run -d -it \
+  --name es_upload \
+  -v /etc/localtime:/etc/localtime:ro \
+  -v /etc/timezone:/etc/timezone:ro \
+  -v /etc/job_project.conf:/etc/job_project.conf:ro \
+  -v /etc/hosts:/etc/hosts:ro \
+  -v /application/hadoop:/application/hadoop:ro \
+  es_upload:v1 \
   /bin/bash
 
 
