@@ -14,6 +14,9 @@ from lxml import etree
 from PIL import Image
 from io import BytesIO
 
+# url 조정
+from urllib.parse import urljoin
+
 import random, time, re, requests
 logger = setup_logger(__name__)
 
@@ -28,20 +31,16 @@ class ChromeDriver:
 
     def __init__(self):
         user_agents = [
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.74 Safari/537.36",
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.131 Safari/537.36",
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.63 Safari/537.36",
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.71 Safari/537.36",
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/95.0.4638.69 Safari/537.36",
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.110 Safari/537.36",
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/97.0.4692.99 Safari/537.36",
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.102 Safari/537.36",
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.60 Safari/537.36"
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.6943.54 Safari/537.36",
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.6943.127 Safari/537.36",
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.6834.160 Safari/537.36",
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.6943.98 Safari/537.36",
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36 Edg/133.0.3065.59",
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36 Whale/3.29.297.11"
         ]
 
         options = Options()
-        options.add_argument("--headless")
+        options.add_argument("--headless=new")
         options.add_argument("--no-sandbox")
         options.add_argument("--disable-dev-shm-usage")
         options.add_argument("--disable-gpu")
@@ -50,8 +49,13 @@ class ChromeDriver:
         options.add_argument("--incognito")
         options.add_argument("--blink-settings=imagesEnabled=false")
         options.add_argument("--disable-logging")
+        options.add_argument("--disable-cache")
+        options.add_argument("--disable-application-cache")
+        options.add_argument("--disk-cache-size=1")
         options.add_argument(f"user-agent={random.choice(user_agents)}")
         options.add_argument("--window-size=1920,1080")
+        options.add_argument("--lang=ko-KR")
+        options.add_argument("--disable-infobars")
 
         options.add_experimental_option("excludeSwitches", ["enable-automation"])
         options.add_experimental_option("useAutomationExtension", False)
@@ -59,17 +63,33 @@ class ChromeDriver:
         self.driver = webdriver.Chrome(options=options)
         logger.info("ChromeDriver 초기화 완료")
 
+    def is_page_available(self, check_text):
+        page_source = self.driver.page_source
+        for txt in check_text:
+            if txt in page_source:
+                logger.warning(f"페이지에서 감지된 문구: '{txt}'")
+                return False
+        return True
+
     def wait_css(self, element, timeout):
-        """
-        CSS Selector 기준 엘리먼트 로딩 대기
-        """
-        try:
-            WebDriverWait(self.driver, timeout).until(
-                EC.presence_of_element_located((By.CSS_SELECTOR, f"{element}:last-child"))
-            )
-        except TimeoutException:
-            logger.error(f"CSS 로딩 타임아웃: {element}")
-            raise
+        for attempt in range(1, 4):
+            try:
+                WebDriverWait(self.driver, timeout).until(
+                    EC.presence_of_element_located((By.CSS_SELECTOR, element))
+                )
+                return
+    
+            except TimeoutException:
+                if attempt < 3:
+                    logger.warning(
+                        f"CSS 로딩 타임아웃 ({attempt}/3): {element} → 새로고침"
+                    )
+                    self.driver.refresh()
+                else:
+                    logger.error(
+                        f"CSS 로딩 최종 실패: {element}"
+                    )
+                    raise
 
     def wait_xpath(self, element, timeout):
         """
@@ -77,20 +97,41 @@ class ChromeDriver:
         """
         try:
             WebDriverWait(self.driver, timeout).until(
-                EC.presence_of_element_located((By.XPATH, element))
+                EC.element_to_be_clickable((By.XPATH, element))
             )
         except TimeoutException:
             logger.error(f"XPATH 로딩 타임아웃: {element}")
             raise
 
-    def click_xpath(self, element):
-        self.driver.find_element(By.XPATH, element).click()
-        logger.info(f"XPATH 클릭 성공: {element}")
+    def click_xpath(self, element, timeout=10):
+        for attempt in range(1, 4):
+            try:
+                el = WebDriverWait(self.driver, timeout).until(
+                    EC.element_to_be_clickable((By.XPATH, element))
+                )
+    
+                # 화면 중앙으로 스크롤
+                self.driver.execute_script(
+                    "arguments[0].scrollIntoView({block: 'center'});", el
+                )
+    
+                el.click()
+                logger.info(f"XPATH 클릭 성공: {element}")
+                return
+    
+            except Exception as e:
+                if attempt < 3:
+                    logger.warning(
+                        f"클릭 실패 ({attempt}/3): {element} → 재시도"
+                    )
+                    self.driver.refresh()
+                else:
+                    logger.error(f"XPATH 클릭 최종 실패: {element}")
+                    raise
 
     def Jobplanet_Auto_Mation(self, selectors, timeout):
         for select in selectors:
-            self.wait_xpath(select, timeout)
-            self.click_xpath(select)
+            self.click_xpath(select, timeout)
 
     def autoscroll(self, element, timeout, sleep_sec, max_retry):
         """
@@ -205,6 +246,7 @@ class JobParser:
     def _clean_text_body(self, text):
         text = re.sub(r'[^가-힣a-zA-Z0-9\s/]+', '', text) # 특수문자 제거
         text = re.sub(r'\s+', ' ', text).strip()  # 연속 공백 제거
+        text = text.strip(',')
         return text
 
     def get_banner(self, xpaths, domain):
@@ -215,25 +257,24 @@ class JobParser:
         """
         banner = {}
         fields = {
-            'pay': ['연봉', '보상금'],
-            'location': ['근무지', '근무 장소'],
-            'career': ['경력'],
+            'pay': ['연봉', '보상금', '급여'],
+            'location': ['근무지', '근무 장소', '근무지역'],
+            'career': ['경력', '신입'],
             'education': ['학력'],
             'deadline': ['마감일'],
-            'type': ['직급', '직책']
+            'type': ['직급', '직책', '고용형태','근무형태']
         }
 
-        if domain == "remember":
-            for field, keywords in fields.items():
-                banner[field] = None
-                for kw in keywords:
-                    for xp in xpaths:
-                        val = self.response.xpath(xp.format(kw=kw)).get()
-                        if val:
-                            banner[field] = self._clean_text_banner(val)
-                            break
-                    if banner[field]:
+        for field, keywords in fields.items():
+            banner[field] = None
+            for kw in keywords:
+                for xp in xpaths:
+                    val = self.response.xpath(xp.format(kw=kw)).get()
+                    if val:
+                        banner[field] = self._clean_text_banner(val)
                         break
+                if banner[field]:
+                    break
         return banner
 
     def get_body(self, xpath_body):
@@ -242,7 +283,8 @@ class JobParser:
         - 특수문자 제거
         - 연속 공백 정리
         """
-        html = self.response.xpath(xpath_body).get()
+        html = self.response.xpath(xpath_body).getall()
+        html = ' '.join(html)
         text_only = remove_tags(html)
         text_only = self._clean_text_body(text_only)
         return text_only
@@ -254,8 +296,18 @@ class JobParser:
         - 크기/용량 필터링 가능
         """
         img_lst = []
-        html = self.response.xpath(xpath_body).get()
+        html = self.response.xpath(xpath_body).getall()
+        html = ' '.join(html)
         tree = etree.HTML(html)
+
+        user_agents = [
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.6943.54 Safari/537.36",
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.6943.127 Safari/537.36",
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.6834.160 Safari/537.36",
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.6943.98 Safari/537.36",
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36 Edg/133.0.3065.59",
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36 Whale/3.29.297.11"
+        ]
 
         for img in tree.xpath(".//img"):
             src = img.get("src")
@@ -263,8 +315,11 @@ class JobParser:
                 logger.info(f"img src 없음 | page: {page_url}")
                 continue
 
+            full_src = urljoin(page_url, src)
+            headers = {"User-Agent": random.choice(user_agents)}
+
             try:
-                resp = requests.get(src, timeout=10)
+                resp = requests.get(full_src, headers=headers, timeout=20)
                 img_bytes = resp.content
                 img_size_kb = len(img_bytes) / 1024
 

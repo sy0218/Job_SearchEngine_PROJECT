@@ -4,7 +4,8 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 from conf.config_log import setup_logger
 from common.job_class import Get_env, Get_properties, StopChecker, DataPreProcessor, CopyToLocal
 from common.crawling_class import ChromeDriver, JobParser
-from common.hook_class import KafkaHook
+from common.kafka_hook import KafkaHook
+
 from datetime import datetime
 
 logger = setup_logger(__name__)
@@ -12,7 +13,7 @@ logger = setup_logger(__name__)
 # ===============================
 # 각 워커 프로세스의 독립적인 자원 풀
 # ===============================
-worker_context = {"browser": None, "properties": None}
+worker_context = {"browser": None, "properties": None, "nfs_img": None}
 
 # ===============================
 # 공통 자원 정리 ( 모든 Chrome/Driver 종료 )
@@ -30,8 +31,9 @@ def clean_all():
 # 워커 초기화 : 워커 프로세스를 초기화하고 필요한 리소스 준비 
 # ( 매번 객체 생성 오버헤드 피하기 위함 )
 # ===============================
-def init_worker(config_path):
+def init_worker(config_path, nfs_img_path):
     worker_context["properties"] = Get_properties(config_path)
+    worker_context["nfs_img"] = nfs_img_path
     worker_context["browser"] = ChromeDriver()
     logger.info(f"Worker 초기화 성공 (PID: {os.getpid()})")
 
@@ -42,6 +44,7 @@ def init_worker(config_path):
 def process_message(msg_value):
     browser = worker_context["browser"]
     props = worker_context["properties"]
+    nfs_img = worker_context["nfs_img"]
 
     try:
         domain = msg_value["domain"]
@@ -52,7 +55,16 @@ def process_message(msg_value):
         }
 
         browser.get(msg_value["href"])
+        no_page = props["option"]["no_page_text"].split("|")
+        if not browser.is_page_available(no_page):
+            logger.warning(f"페이지 없음 → 메시지 건너뜀 (URL: {msg_value.get('href')})")
+            return None
         browser.wait_css(xpaths["wait"], 10)
+
+        # 사전 셋업 ( 필요한 도메인 작업 )
+        setup_flag = props["option"][f"{domain}.setup_flag"]
+        if setup_flag == 'y':
+            browser.Jobplanet_Auto_Mation(props["auto_setup"][domain].split('\t'), 30)
 
         parser = JobParser(browser)
         parser.get_response()
@@ -70,7 +82,7 @@ def process_message(msg_value):
         for binary_blob, size_kb in images_binary:
             img_hash = DataPreProcessor._hash(binary_blob.hex() + str(size_kb))
             save_path = CopyToLocal.save(
-                (props["nfs_path"]["img"], img_hash[0:2], img_hash[2:4], img_hash),
+                (nfs_img, img_hash[0:2], img_hash[2:4], img_hash),
                 binary_blob
             )
             images.append(img_hash)
@@ -86,9 +98,10 @@ def process_message(msg_value):
 # ===============================
 def collect_results(futures):
     results = []
-    for future in as_completed(futures, timeout=60):
+    for future in as_completed(futures, timeout=600):
         res = future.result()
-        results.append(res)
+        if res is not None: # 페이지 없으면 수집 안 함
+            results.append(res)
     return results
 
 # ===============================
@@ -100,6 +113,7 @@ def _main():
     # ===============================
     consumer_env = Get_env._consumer()
     kafka_env = Get_env._kafka()
+    nfs_env = Get_env._nfs()
     properties = Get_properties(consumer_env["config_path"])
     poll_size = int(properties["poll_opt"]["poll_size"])
     logger.info("환경 변수 및 설정 로드 완료")
@@ -140,21 +154,28 @@ def _main():
         with ProcessPoolExecutor(
             max_workers=poll_size,
             initializer=init_worker,
-            initargs=(consumer_env["config_path"],)
+            initargs=(consumer_env["config_path"], nfs_env["nfs_img"])
         ) as executor:
 
             logger.info(f"Multi-Consumer 루프 시작 (Workers: {poll_size})")
 
+            batch = []
             while True:
-                batch = []
+                # Stop file 체크
+                if StopChecker._job_stop(consumer_env["stop_dir"], consumer_env["stop_file"]):
+                    logger.warning("Stop 파일 감지 → 종료 프로세스 진입")
+                    break
+
                 while len(batch) < poll_size:
                     msg = kafka_consumer.poll(3.0)
                     if msg is None:
-                        logger.info(f"[INFO] 아직 메시지 없음!  현재 batch size: {len(batch)}.. 30초 대기..")
-                        time.sleep(30)
-                        continue
-
+                        break
                     batch.append(msg)
+
+                if len(batch) < poll_size:
+                    logger.info(f"[INFO] 아직 메시지 없음!  현재 batch size: {len(batch)}.. 30초 대기..")
+                    time.sleep(30)
+                    continue
 
                 offset_info = f"partition-{batch[0].partition()} : {batch[0].offset()} ~ {batch[-1].offset()}"
                 logger.info(f"==== 배치 병렬 처리 시작.. {offset_info} ====")
@@ -173,25 +194,24 @@ def _main():
                 # dict → NDJSON 변환
                 ndjson_data = DataPreProcessor._dict_to_ndjson(futures_results)
                 # ndjson 저장
-                CopyToLocal.save((properties["nfs_path"]["data"], ndjson_fn), ndjson_data.encode("utf-8"))
+                CopyToLocal.save((nfs_env["nfs_data"], ndjson_fn), ndjson_data.encode("utf-8"))
 
                 # kafka 오프셋 커밋
-                #kafka.commit(batch[-1])
+                kafka_consumer.commit(batch[-1])
+                batch = []
                 logger.info(f"==== 배치 병렬 처리 완료.. {offset_info} ====")
 
-                # Stop file 체크
-                if StopChecker._job_stop(consumer_env["stop_dir"], consumer_env["stop_file"]):
-                    logger.warning("Stop 파일 감지 → 종료 프로세스 진입")
-                    break
-
-                time.sleep(10)
+                time.sleep(5)
 
     except Exception as e:
         logger.error("Consumer 실행 중 오류 발생, 모든 배치 중단", exc_info=True)
+
     finally:
         kafka_producer.flush()
         kafka_consumer.close()
         clean_all()
+        time.sleep(3)
+        os.system("rm -rf /tmp/.*Chrom*")
         logger.info("프로세스 종료. 모든 자원 반납 완료.")            
 
 

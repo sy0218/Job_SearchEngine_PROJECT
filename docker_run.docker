@@ -13,6 +13,7 @@ docker run -d -it \
   --name consumer \
   -v /etc/localtime:/etc/localtime:ro \
   -v /etc/timezone:/etc/timezone:ro \
+  -v /work/jsy/job_project/logs:/work/job_project/logs \
   -v /nfs:/nfs \
   consumer:v1 \
   /bin/bash

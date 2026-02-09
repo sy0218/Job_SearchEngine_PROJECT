@@ -3,7 +3,7 @@ from datetime import datetime
 
 
 def setup_logger(name="job_project"):
-    base_log_path = os.environ.get("COLLECTOR_LOG_FILE")
+    base_log_path = os.environ.get("CONSUMER_LOG_FILE")
     today = datetime.now().strftime("%Y%m%d")
     log_file = f"{base_log_path}_{today}.log"
 

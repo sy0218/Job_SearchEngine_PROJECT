@@ -2,7 +2,8 @@
 from conf.config_log import setup_logger
 from common.job_class import Get_env, Get_properties, StopChecker, DataPreProcessor, CopyToLocal
 from common.crawling_class import ChromeDriver, JobParser
-from common.hook_class import KafkaHook
+
+from common.kafka_hook import KafkaHook
 
 import sys, time
 logger = setup_logger(__name__)
@@ -19,7 +20,7 @@ def _main():
         """
         return {
             "body": properties["xpath"][f"{domain}.body"],
-            "banner": properties["xpath"][f"{domain}.banner"].split("|"),
+            "banner": properties["xpath"][f"{domain}.banner"].split('|'),
             "wait": properties["xpath"][f"{domain}.wait"]
         }
 
@@ -73,7 +74,7 @@ def _main():
                 print(msg_value)
                 xpaths = _get_xpaths(msg_value["domain"])
                 browser.get(msg_value["href"])
-                browser.wait_css(xpaths["wait"], 10)
+                browser.wait_css(xpaths["wait"], 20)
 
                 parser = JobParser(browser)
                 response = parser.get_response()
@@ -102,7 +103,8 @@ def _main():
                     images.append(save_path)
 
                 batch_data = msg_value | {"body_text": body, "body_img": images} | banner
-                print(batch_data) 
+                print(batch_data)
+                print()
              
 
             # kafka.commit(batch[-1]) # 컨슈머 커밋!
@@ -115,7 +117,7 @@ def _main():
                 consumer_env["stop_file"]
             ):
                 logger.warning("Stop 파일 감지 → Consumer 종료")
-                sys.exit(0)
+                break
 
             time.sleep(5)
 

@@ -9,57 +9,77 @@ from lxml import etree
 from PIL import Image
 from io import BytesIO
 
-test_dict = {"domain":"jobplanet","href":"https://career.rememberapp.co.kr/job/posting/244893?postQuerySessionId=3401716b-07ab-4401-929b-bd14b214388b&jdViewSource=inweb_list&channel=inweb_list&source=inweb_list&isHighlight=false","company":"올릿","title":"마케팅 리더","msgid":"020d11cf3fce0e19060a3c3fffe4664c8360e62c246883a9621b705d3a78c95d"}
+import sys
+
+# url 조정
+from urllib.parse import urljoin
+
+test_dict = {"domain":"jobplanet","href":"https://www.saramin.co.kr/zf_user/jobs/view?view_type=list&rec_idx=52864049","company":"올릿","title":"마케팅 리더","msgid":"020d11cf3fce0e19060a3c3fffe4664c8360e62c246883a9621b705d3a78c95d"}
 
 browser = ChromeDriver()
 browser.get(test_dict['href'])
-browser.wait_css("div[class='sc-884c2c6c-2 jwCPBj']", 10)
+page_url = test_dict['href']
+if "페이지를 찾을 수 없어요" in browser.driver.page_source or "채용정보를 찾을 수 없습니다" in  browser.driver.page_source:
+    print(f"삭제된 공고: {test_dict['href']}")
+    sys.exit(0)
+browser.wait_css("div[class='wrap_jv_cont']", 10)
+
+# 사전셋업 필요
+#setup_list = ["//button[.//span[contains(text(), '상세 정보 더 보기')]]"]
+#browser.Jobplanet_Auto_Mation(setup_list, 30)
 
 parser = JobParser(browser)
 response = parser.get_response()
 
 print(browser.title)
+
 fields = {
-    'pay': ['연봉', '보상금'],
+    'pay': ['연봉', '보상금', '급여'],
     'location': ['근무지', '근무 장소', '근무지역'],
-    'career': ['경력'],
+    'career': ['경력', '신입'],
     'education': ['학력'],
     'deadline': ['마감일'],
-    'type': ['직급', '직책', '고용형태']
+    'type': ['직급', '직책', '고용형태','근무형태']
 }
 result = {}
+
 
 for field, keywords in fields.items():
     result[field] = None
     for kw in keywords:
-        xpath_query = (
-            f"//span[contains(normalize-space(), '{kw}')]/following-sibling::*[1]//text()"
-        )
-        val = response.xpath(xpath_query).get()
-        if val:
-            result[field] = val.strip()
-            break
+        xpath_query_list = [
+            f"//div[contains(@class,'cont')]//dt[normalize-space()='{kw}']/following-sibling::dd[1]/strong/text()",
+            f"//div[contains(@class,'cont')]//dt[normalize-space()='{kw}']/following-sibling::dd[1]//text()",
+            f"//div[contains(@class,'status')]//dt[normalize-space()='{kw}']/following-sibling::dd[1]/text()"
+        ]
+
+        for xpath_query in xpath_query_list:
+            val = response.xpath(xpath_query).get()
+            if val:
+                result[field] = val.strip()
+                break
+
 
 print(result)
 
-#result_test = response.xpath("//div[@class='sc-a34accef-0 cBEpAk']").get()
+#result_test = response.xpath("//div[@class='wrap_jv_cont']").get()
 #parser = etree.HTMLParser()
 #tree = etree.fromstring(result_test, parser)
 #pretty_html = etree.tostring(tree, pretty_print=True, encoding='unicode')
 #print(pretty_html)
-
-
-html = response.xpath("//div[@class='sc-70f5b6f6-0 kXwJGP']").getall()
-html = " ".join(html)
 #
+#
+html = response.xpath("//div[contains(@class, 'user_content') and contains(@class, 'jobsViewDetail')]").getall()
+html = " ".join(html)
+
 parser = etree.HTMLParser()
 tree = etree.fromstring(html, parser)
-#
+
 pretty_html = etree.tostring(tree, pretty_print=True, encoding='unicode')
 # html 트리구조 보기
 print(pretty_html)
 print()
-#
+
 # 텍스트만 추출
 text_only = ''.join(tree.itertext())
 # 한글, 영어, 숫자, 공백만 남기고 나머지 제거 (이모지, 특수문자 제거)
@@ -67,14 +87,16 @@ clean_text = re.sub(r'[^가-힣a-zA-Z0-9\s%~/]', ' ', text_only)
 # 연속 공백 정리
 clean_text = re.sub(r'\s+', ' ', clean_text).strip()
 print(clean_text)
-#
-#
+
+
 # 이미지 마지막!
 img_tags = tree.xpath(".//img")
 for img in img_tags:
     src = img.get("src")
+    full_src = urljoin(page_url, src)
+    headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36"}
     try:
-        resp = requests.get(src, timeout=5)
+        resp = requests.get(full_src, headers=headers, timeout=15, verify=False)
         img_bytes = resp.content # 바이너리 데이터
         img_size_kb = len(img_bytes) / 1024
 
