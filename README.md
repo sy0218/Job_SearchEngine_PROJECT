@@ -70,7 +70,7 @@
 | 📡 `collector.service` | **[`📘 collector 통합 테스트`](./docs/collector_integration_test.md)** |
 | 📦 `consumer.service` | **[`📘 consumer 통합 테스트`](./docs/consumer_integration_test.md)** |
 | 🚚 `hadoop_upload.service` | **[`📘 hadoop_upload 통합 테스트`](./docs/hadoop_upload_integration_test.md)** |
-| 🕵️  `hadoop_event.service` | **[`📘 hadoop_event 통합 테스트`](./docs/test_hadoop_event.md)** |
+| 🕵️  `hadoop_event.service` | **[`📘 hadoop_event 통합 테스트`](./docs/hadoop_event_integration_test.md)** |
 | 🔍  `ocr.service` | **[`📘 ocr 통합 테스트`](./docs/test_ocr.md)** |
 | 🛢️  `warehouse.service` | **[`📘 warehouse 통합 테스트`](./docs/test_warehouse.md)** |
 | 📤 `esupload.service` | **[`📘 esupload 통합 테스트`](./docs/test_esupload.md)** |
