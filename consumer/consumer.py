@@ -164,6 +164,7 @@ def _main():
                 # Stop file 체크
                 if StopChecker._job_stop(consumer_env["stop_dir"], consumer_env["stop_file"]):
                     logger.warning("Stop 파일 감지 → 종료 프로세스 진입")
+                    executor.shutdown(wait=False, cancel_futures=True)
                     break
 
                 while len(batch) < poll_size:
