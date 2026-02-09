@@ -61,9 +61,7 @@ sudo systemctl status collector.service
 ---
 ### **✔ 검증 항목 ( 정상 확인 )**
 ✅ 서비스 상태: active (running)
-
 ✅ 오류 로그 없음
-
 ✅ Chrome 프로세스 정상 실행
 
 ---
@@ -79,9 +77,7 @@ sudo systemctl status collector.service
 ---
 ### **✔ 검증 항목 ( 정상 확인 )**
 ✅ 채용 데이터 파싱 성공
-
 ✅ Redis key 정상 저장
-
 ✅ Kafka topic 메시지 증가
 
 ---
@@ -97,9 +93,7 @@ systemctl stop collector.service
 ---
 ### **✔ 검증 항목 ( 정상 확인 )**
 ✅ Collector 안전 종료
-
 ✅ ChromeDriver 종료
-
 ✅ 로그에 종료 메시지 기록
 
 ---
@@ -114,7 +108,6 @@ systemctl stop collector.service
 ---
 ### **✔ 검증 항목 ( 정상 확인 )**
 ✅ 중복 데이터 Kafka 미전송
-
 ✅ Redis 정상 동작
 
 ---
@@ -125,9 +118,7 @@ systemctl stop collector.service
 ---
 ### **✔ 검증 항목 ( 정상 확인 )**
 ✅ 메모리 누수 없음
-
 ✅ 크롤링 지속 수행
-
 ✅ 프로세스 종료 없음
 
 ---
@@ -147,9 +138,7 @@ systemctl stop collector.service
 
 ### **✔ 검증 항목 ( 정상 확인 )**
 ✅ CPU 및 Load Average는 서비스 기동 후 증가했으나 **안정적인 범위**
-
 ✅ 메모리 사용률 변화는 **미미**
-
 ✅ I/O Wait는 **매우 낮은 수준 유지**
 
 ---
@@ -162,9 +151,7 @@ tail -f /work/job_project/logs/collector/*.log
 ---
 ### **✔ 검증 항목 ( 정상 확인 )**
 ✅ ERROR 로그 없음
-
 ✅ 크롤링 정상 진행
-
 ✅ Kafka 전송 로그 확인
 
 ---

@@ -1,4 +1,0 @@
-[INIT] PostgreSQL connected
-[START] HDFS CLOSE watcher started
-[WATCH] Path prefix: /hive/job_project
-[CLOSE] path=/hive/job_project/new/es_bulk_20260204095938.gz, fileSize=131448
