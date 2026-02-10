@@ -24,6 +24,7 @@ docker run -d -it \
   --name ocr \
   -v /etc/localtime:/etc/localtime:ro \
   -v /etc/timezone:/etc/timezone:ro \
+  -v /work/jsy/job_project/logs:/work/job_project/logs \
   -v /nfs:/nfs:ro \
   ocr:v1 \
   /bin/bash

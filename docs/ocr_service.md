@@ -113,6 +113,7 @@ img=/nfs/img
 
 [ocr]
 confidence=0.6
+max_side=10000
 ```
 
 ---
