@@ -16,7 +16,7 @@ if [ -z "${BOOTSTRAP_SERVER}" ]; then
 fi
 
 # 2. Schema Registry URL
-read -p "Schema Registry URL을 입력하세요 (예: http://192.168.122.60:8081): " SCHEMA_REGISTRY_URL
+read -p "Schema Registry URL을 입력하세요 (예: http://192.168.122.59:8081): " SCHEMA_REGISTRY_URL
 if [ -z "${SCHEMA_REGISTRY_URL}" ]; then
     log_error "Schema Registry URL이 입력되지 않았습니다."
     exit 1
@@ -40,6 +40,7 @@ while true; do
     echo "6) 특정 토픽 스키마 삭제"
     echo "7) 특정 토픽 삭제"
     echo "8) 토픽 생성 (파티션/레플리카/리텐션)"
+    echo "9) 컨슈머 그룹 오프셋 리셋"
     echo "q) 종료"
     echo "------------------------------------------"
     read -p "번호를 선택하세요: " choice
@@ -125,6 +126,42 @@ while true; do
                 --entity-type topics \
                 --entity-name "${target_topic}" \
                 --describe
+            ;;
+        9)
+            read -p "Consumer Group ID를 입력하세요: " target_group
+            [ -z "${target_group}" ] && log_error "Group ID 누락" && continue
+
+            read -p "초기화할 토픽명을 입력하세요: " target_topic
+            [ -z "${target_topic}" ] && log_error "토픽명 누락" && continue
+
+            echo "------------------------------------------"
+            log_info "오프셋 초기화 대상"
+            echo "  Group : ${target_group}"
+            echo "  Topic : ${target_topic} (모든 파티션)"
+            echo "------------------------------------------"
+
+            read -p "!!정말 초기화하시겠습니까? (yes/no): " confirm
+            if [ "${confirm}" != "yes" ]; then
+                log_info "취소되었습니다."
+                continue
+            fi
+
+            kafka-consumer-groups.sh \
+                --bootstrap-server "${BOOTSTRAP_SERVER}" \
+                --group "${target_group}" \
+                --topic "${target_topic}" \
+                --reset-offsets \
+                --to-earliest \
+                --execute
+
+            log_info "오프셋 초기화 완료"
+
+            echo ""
+            log_info "초기화 결과 확인"
+            kafka-consumer-groups.sh \
+                --bootstrap-server "${BOOTSTRAP_SERVER}" \
+                --describe \
+                --group "${target_group}"
             ;;
         q|Q)
             log_info "스크립트를 종료합니다."

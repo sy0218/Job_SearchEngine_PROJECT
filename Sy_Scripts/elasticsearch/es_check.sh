@@ -33,6 +33,7 @@ while true; do
     echo "6) 특정 인덱스 샘플 문서 조회 (1건)"
     echo "7) 특정 인덱스 삭제"
     echo "8) 인덱스 생성 (shard/replica)"
+    echo "9) 특정 인덱스 모든 데이터 삭제 (index유지)"
     echo "q) 종료"
     echo "------------------------------------------"
     read -p "번호를 선택하세요: " choice
@@ -103,6 +104,29 @@ while true; do
                 }" | jq .
 
             log_info "인덱스 생성 완료"
+            ;;
+        9)
+            read -p "데이터를 모두 삭제할 인덱스명을 입력하세요: " index
+            [ -z "${index}" ] && log_error "인덱스명 누락" && continue
+
+            echo "인덱스는 유지되고 모든 문서만 삭제됩니다."
+            read -p "정말 실행하시겠습니까? (y/N): " confirm
+
+            if [[ "${confirm}" =~ ^[Yy]$ ]]; then
+                log_info "전체 문서 삭제 실행..."
+
+                curl -s -X POST "${ES_URL}/${index}/_delete_by_query?pretty" \
+                    -H "Content-Type: application/json" \
+                    -d '{
+                        "query": {
+                            "match_all": {}
+                        }
+                    }' | jq .
+
+                log_info "전체 문서 삭제 완료"
+            else
+                log_info "작업 취소"
+            fi
             ;;
         q|Q)
             log_info "스크립트를 종료합니다."
