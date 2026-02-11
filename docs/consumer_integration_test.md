@@ -158,7 +158,7 @@ NDJSON 및 이미지 저장 경로가 정상 동작하는지 확인
 ---
 <br>
 
-## 📊 리소스 모니터링 예시 (Grafana)
+## 📊 리소스 모니터링 (Grafana)
 > Consumer 서비스 기동 전/후 리소스 비교
 
 | 📌 지표 | 📈 Grafana 쿼리 | 🔍 측정 결과 |
@@ -211,7 +211,7 @@ tail -f /work/job_project/logs/consumer/*.log
 ---
 <br>
 
-# 🏆 테스트 결론 (요약)
+# 🏆 테스트 결론
 **Consumer 서비스 통합 테스트 결과**
 
 ---

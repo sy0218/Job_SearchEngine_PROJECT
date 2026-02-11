@@ -1,5 +1,5 @@
 # 🕵️ hadoop_event.service (HDFS Close Event Watcher)
-> HDFS에 업로드된 파일의 **CLOSE 이벤트**를 감시하고 이벤트 발생 시 **PostgreSQL에 파일 경로 및 크기 기록**을 수행하는 **백그라운드 서비스**입니다.
+> HDFS에 업로드된 파일의 **CLOSE 이벤트**를 감시하고 이벤트 발생 시 **PostgreSQL에 하둡 txid + 파일 경로 및 크기 기록**을 수행하는 **백그라운드 서비스**입니다.
 
 - **systemd 서비스**로 자동 실행 및 관리  
 - HDFS CLOSE 이벤트 실시간 감시 (`DFSInotifyEventInputStream`)  
@@ -56,7 +56,7 @@ systemd (hadoop_event.service)
                           ├─ CLOSE 이벤트 필터
                           ├─ 감시 경로(`watch.path`) 필터
                           ├─ `_COPYING_` 제거 후 로그 기록
-                          └─ PostgreSQL에 `file_path`, `file_size` INSERT
+                          └─ PostgreSQL에 `file_txid`, `file_path`, `file_size` INSERT
 ```
 
 ---
@@ -73,10 +73,13 @@ systemd (hadoop_event.service)
 [INIT] PostgreSQL connected
 [START] HDFS CLOSE watcher started
 [WATCH] Path prefix: /hive/job_project
-[CLOSE] path=/hive/job_project/org/20260129102650.gz, fileSize=143232
-[CLOSE] path=/hive/job_project/org/20260129134249.gz, fileSize=127496
-[CLOSE] path=/hive/job_project/org/20260129141543.gz, fileSize=139498
-[CLOSE] path=/hive/job_project/org/20260129141543.gz, fileSize=139498
+[CLOSE] txId=19487, path=/hive/job_project/org/20260209104438.gz, fileSize=510891
+[CLOSE] txId=19493, path=/hive/job_project/org/20260209104453.gz, fileSize=669203
+[CLOSE] txId=19499, path=/hive/job_project/org/20260209104508.gz, fileSize=808391
+[CLOSE] txId=19507, path=/hive/job_project/org/20260209104523.gz, fileSize=485441
+[CLOSE] txId=19513, path=/hive/job_project/org/20260209104538.gz, fileSize=438831
+[CLOSE] txId=19519, path=/hive/job_project/org/20260209104553.gz, fileSize=408623
+[CLOSE] txId=19525, path=/hive/job_project/org/20260209104608.gz, fileSize=416109
 ~
 ```
 

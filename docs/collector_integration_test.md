@@ -60,9 +60,9 @@ sudo systemctl status collector.service
 ```
 ---
 ### **✔ 검증 항목 ( 정상 확인 )**
-✅ 서비스 상태: active (running)
-✅ 오류 로그 없음
-✅ Chrome 프로세스 정상 실행
+✅ 서비스 상태: active (running)  
+✅ 오류 로그 없음  
+✅ Chrome 프로세스 정상 실행  
 
 ---
 <br>
@@ -76,9 +76,9 @@ sudo systemctl status collector.service
 3) Kafka 메시지 전송 확인
 ---
 ### **✔ 검증 항목 ( 정상 확인 )**
-✅ 채용 데이터 파싱 성공
-✅ Redis key 정상 저장
-✅ Kafka topic 메시지 증가
+✅ 채용 데이터 파싱 성공  
+✅ Redis key 정상 저장  
+✅ Kafka topic 메시지 증가  
 
 ---
 <br>
@@ -92,9 +92,9 @@ systemctl stop collector.service
 ```
 ---
 ### **✔ 검증 항목 ( 정상 확인 )**
-✅ Collector 안전 종료
-✅ ChromeDriver 종료
-✅ 로그에 종료 메시지 기록
+✅ Collector 안전 종료  
+✅ ChromeDriver 종료  
+✅ 로그에 종료 메시지 기록  
 
 ---
 <br>
@@ -107,8 +107,8 @@ systemctl stop collector.service
 2) Redis key 확인
 ---
 ### **✔ 검증 항목 ( 정상 확인 )**
-✅ 중복 데이터 Kafka 미전송
-✅ Redis 정상 동작
+✅ 중복 데이터 Kafka 미전송  
+✅ Redis 정상 동작  
 
 ---
 <br>
@@ -117,14 +117,14 @@ systemctl stop collector.service
 ### ✔ 목적 : 24시간 이상 실행 시 안정성 검증
 ---
 ### **✔ 검증 항목 ( 정상 확인 )**
-✅ 메모리 누수 없음
-✅ 크롤링 지속 수행
-✅ 프로세스 종료 없음
+✅ 메모리 누수 없음  
+✅ 크롤링 지속 수행  
+✅ 프로세스 종료 없음  
 
 ---
 <br>
 
-## 📊 Grafana 모니터링 항목
+## 📊 리소스 모니터링 (Grafana)
 > **Collector 서비스 기동 전/후 리소스 비교**
 
 | 📌 지표 | 📈 Grafana 쿼리 | 🔍 측정 결과 |
@@ -178,7 +178,7 @@ tail -f /work/job_project/logs/collector/*.log
 ---
 <br>
 
-# 🏆 테스트 결론 (요약)
+# 🏆 테스트 결론
 **Collector 서비스 통합 테스트 결과**
 
 ---

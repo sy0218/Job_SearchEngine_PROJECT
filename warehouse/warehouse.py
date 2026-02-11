@@ -1,6 +1,8 @@
 from conf.config_log import setup_logger
 from common.job_class import Get_env, Get_properties, StopChecker, DataPreProcessor
-from common.hook_class import RedisHook, PostgresHook, HdfsHook
+from common.redis_hook import RedisHook
+from common.postgres_hook import PostgresHook
+from common.hdfs_hook import HdfsHook
 from common.morph_analyzer import MorphAnalyzer
 import time, json
 
@@ -52,7 +54,7 @@ def _main():
         # Hadoop 연결
         # ===============================
         hdfs = HdfsHook(
-            host=hadoop_env["hadoop_fs_name"], 
+            host=hadoop_env["hadoop_fs_name"],
             user=hadoop_env["hadoop_user"]
         )
         hdfs.connect()
@@ -67,6 +69,9 @@ def _main():
         # ===============================
         # 메인 처리 루프
         # ===============================
+        cluster_num = int(properties["option"]["cluster_num"])
+        process_num = int(properties["option"]["process_num"])
+
         while True:
             es_bulk = [] # 엘라스틱서치 bulk 용 리스트
 
@@ -78,7 +83,10 @@ def _main():
                 break
 
             # 하둡에서 데이터 가져오는 로직
-            row = postgresql.fetchone(properties["sql"]["select_hadoop_org"])
+            row = postgresql.fetchone(
+                properties["sql"]["select_hadoop_org"],
+                (cluster_num, process_num)
+            )
 
             if not row:
                 logger.info("처리할 대상 파일 없음, 대기 후 재시도..")
@@ -86,8 +94,9 @@ def _main():
                 continue
 
             file_path = row[0]
+            txid = row[1]
 
-            logger.info(f"==== Processing file: {file_path} ====")
+            logger.info(f"==== Processing file: {file_path} (txid: {txid}) ====")
             data = hdfs.read_bytes(file_path)
 
             text = DataPreProcessor._decompress_gzip_bytes(data)
@@ -113,7 +122,7 @@ def _main():
             values = redis.mget(img_key)
             clean_texts = DataPreProcessor._clean_ocr_text(values)
             img_text_mapping = dict(zip(img_key, clean_texts))
-                 
+
             # 본문 텍스트 + OCR 텍스트 → 형태소 분석
             for idx in range(len(job_json)):
                 ocr_texts = []
@@ -136,17 +145,16 @@ def _main():
 
             # 벌크용 최종 하둡에 gz으로 올리기
             hdfs_path = f"{properties['dir']['hadoop_dir']}/es_bulk_{time.strftime('%Y%m%d%H%M%S')}.gz"
-            hdfs.upload_lines(hdfs_path, es_bulk) 
+            hdfs.upload_lines(hdfs_path, es_bulk)
 
             # 처리 커밋
             postgresql.execute(
                 properties["sql"]["update_hadoop_event"],
-                (file_path,),
+                (txid, file_path),
                 commit=True
             )
 
             logger.info(f"==== Processing file: {file_path} → {hdfs_path} ====")
-            
 
             time.sleep(3)
 
@@ -157,7 +165,6 @@ def _main():
         redis.close()
         postgresql.close()
         logger.info("프로세스 종료. 모든 자원 반납 완료.")
-
 
 if __name__ == "__main__":
     _main()

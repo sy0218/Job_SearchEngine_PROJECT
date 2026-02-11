@@ -6,14 +6,14 @@ CREATE TABLE job.job_set (
 
 ## job.hadoop_event ( Table ) ##
 CREATE TABLE job.hadoop_event (
-    id BIGSERIAL PRIMARY KEY,
+    txid BIGINT PRIMARY KEY,
     file_path TEXT NOT NULL,
     file_size BIGINT NOT NULL,
     event_check BOOLEAN
 );
 # ( Index )
 CREATE INDEX idx_hadoop_event_event_check_null
-ON job.hadoop_event (id)
+ON job.hadoop_event (txid)
 WHERE event_check IS NULL;
 
 CREATE INDEX idx_hadoop_event_file_path
@@ -22,13 +22,13 @@ ON job.hadoop_event (file_path);
 
 ## job.hadoop_org ( View Table ) ##
 CREATE OR REPLACE VIEW job.hadoop_org AS
-SELECT id, file_path, file_size, event_check
+SELECT txid, file_path, file_size, event_check
 FROM job.hadoop_event
 WHERE file_path LIKE '/hive/job_project/org/%'
 
 
 ## job.hadoop_new ( View Table ) ##
 CREATE OR REPLACE VIEW job.hadoop_new AS
-SELECT id, file_path, file_size, event_check
+SELECT txid, file_path, file_size, event_check
 FROM job.hadoop_event
 WHERE file_path LIKE '/hive/job_project/new/%'

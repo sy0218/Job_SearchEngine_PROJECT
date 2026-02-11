@@ -136,7 +136,7 @@ touch /work/jsy/job_project/hadoop_upload/control/hadoop_upload.stop
 ---
 <br>
 
-## 📊 리소스 모니터링 결과 (Grafana)
+## 📊 리소스 모니터링 (Grafana)
 > Hadoop Upload 서비스 기동 전/후 비교
 
 | 📌 지표 | 기동 전 | 기동 후 |
@@ -184,7 +184,7 @@ tail -f /work/job_project/logs/hadoop_upload/*.log
 ---
 <br>
 
-# 🏆 테스트 결론 (요약)
+# 🏆 테스트 결론
 **Hadoop upload 서비스 통합 테스트 결과**
 
 ---

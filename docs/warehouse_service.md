@@ -5,6 +5,7 @@
 
 - **systemd 서비스**로 자동 실행 및 관리  
 - Redis OCR 결과 대기 및 병합 처리  
+- txid 기반 스케일아웃 병렬 처리 (cluster_num / process_num)
 - PostgreSQL 기반 처리 상태 관리  
 - Hadoop(HDFS) 연동 데이터 처리  
 - Kiwi + spaCy 기반 형태소 분석  
@@ -22,9 +23,11 @@
 | `job.conf` | 환경 변수 설정 파일 |
 | `warehouse.properties` | SQL 쿼리 및 HDFS 경로 설정 |
 | `config_log.py` | 로그 설정 (날짜별 파일 생성) |
-| `common/hook_class.py` | Redis / PostgreSQL / HDFS Hook |
-| `common/job_class.py` | 환경 변수, StopChecker, 데이터 전처리 유틸 |
+| `common/redis_hook.py` | Redis 연결 및 데이터 처리 |
+| `common/postgres_hook.py` | PostgreSQL 연결 및 쿼리 처리 |
+| `common/hdfs_hook.py` | HDFS 파일 입출력 처리 |
 | `common/morph_analyzer.py` | 형태소 분석 (Kiwi + spaCy) |
+| `common/job_class.py` | 환경 변수, StopChecker, 데이터 전처리 유틸 |
 
 ---
 <br>
@@ -48,6 +51,7 @@ systemd (warehouse.service)
                              │    └─ 감지 시 안전 종료
                              │
                              ├─ 처리 대상 파일 조회 (PostgreSQL)
+                             │    └─ txid % cluster_num == process_num 조건 필터링
                              │    └─ 대상 없을 경우 대기 후 재시도
                              │
                              ├─ HDFS gzip NDJSON 파일 읽기
@@ -66,6 +70,7 @@ systemd (warehouse.service)
 <br>
 
 ## 🌟 주요 특징
+- **txid 기반 병렬 분산 처리 (cluster_num / process_num 기준)**
 - HDFS gzip NDJSON 파일 처리
 - Redis 기반 OCR 결과 대기 및 병합
 - 본문 + 이미지 OCR 텍스트 통합 처리
@@ -179,9 +184,13 @@ export NFS_IMG=/nfs/img
 
 ## 📋 설정 파일 (warehouse.properties)
 ```ini
+[option]
+process_num=1
+cluster_num=3
+
 [sql]
-select_hadoop_org=SELECT file_path FROM job.hadoop_org WHERE event_check IS NULL ORDER BY id LIMIT 1;
-update_hadoop_event=UPDATE job.hadoop_event SET event_check = TRUE WHERE event_check IS NULL and file_path = %s
+select_hadoop_org=SELECT file_path, txid FROM job.hadoop_org WHERE event_check IS NULL and MOD(txid, %s) = %s ORDER BY txid LIMIT 1;
+update_hadoop_event=UPDATE job.hadoop_event SET event_check = TRUE WHERE event_check IS NULL and txid = %s and file_path = %s
 
 [dir]
 hadoop_dir=/hive/job_project/new
@@ -218,4 +227,5 @@ sudo systemctl status warehouse.service
 3) **HDFS 업로드는 Elasticsearch Bulk 포맷 기준**
 4) **gzip NDJSON 기반 대용량 처리 최적화**
 5) **처리 완료 후 반드시 PostgreSQL 커밋 수행**
+6) **병렬 처리 환경에서 각 서버는 서로 다른 process_num을 사용해야 하며, cluster_num 설정은 모든 노드에서 동일해야 함**
 ---

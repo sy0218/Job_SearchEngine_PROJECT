@@ -91,13 +91,12 @@ public class HdfsCloseWatcher {
     }
 
     private static final String INSERT_SQL =
-        "INSERT INTO job.hadoop_event (txid, file_path, file_size) VALUES (?, ?, ?)";
+        "INSERT INTO job.hadoop_event (file_path, file_size) VALUES (?, ?)";
 
-    private static void insertEvent(long txId, String path, long size) {
+    private static void insertEvent(String path, long size) {
         try (PreparedStatement ps = pgConn.prepareStatement(INSERT_SQL)) {
-            ps.setLong(1, txId);
-            ps.setString(2, path);
-            ps.setLong(3, size);
+            ps.setString(1, path);
+            ps.setLong(2, size);
             ps.executeUpdate();
         } catch (Exception e) {
             logToFile("[ERROR][DB] " + e.getMessage());
@@ -145,15 +144,13 @@ public class HdfsCloseWatcher {
                                 path.replace("._COPYING_", "");
 
                         long fileSize = closeEvent.getFileSize();
-                        long txId = batch.getTxid();
 
                         logToFile(
-                            "[CLOSE] txId=" + txId +
-                            ", path=" + cleanPath +
+                            "[CLOSE] path=" + cleanPath +
                             ", fileSize=" + fileSize
                         );
 
-                        insertEvent(txId, cleanPath, fileSize);
+                        insertEvent(cleanPath, fileSize);
                     }
                 }
             }

@@ -178,7 +178,7 @@ tail -f /work/job_project/logs/ocr/*.log
 ---
 <br>
 
-# 🏆 테스트 결론 (요약)
+# 🏆 테스트 결론
 **OCR 서비스 통합 테스트 결과**
 
 ---
