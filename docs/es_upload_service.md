@@ -6,6 +6,7 @@
 
 - **systemd 서비스** 기반 자동 실행
 - HDFS gzip NDJSON 스트리밍 처리
+- txid 기반 스케일아웃 병렬 처리 (cluster_num / process_num)
 - Elasticsearch Bulk 업로드
 - PostgreSQL 처리 상태 관리
 - Chunk 단위 업로드 최적화
@@ -51,6 +52,7 @@ systemd (es_upload.service)
                              │    └─ 감지 시 안전 종료
                              │
                              ├─ 처리 대상 파일 조회 (PostgreSQL)
+                             │    └─ txid % cluster_num == process_num 조건 필터링
                              │    └─ 대상 없으면 대기 후 재시도
                              │
                              ├─ HDFS gzip NDJSON 파일 읽기
@@ -66,6 +68,7 @@ systemd (es_upload.service)
 <br>
 
 ## 🌟 주요 특징
+- txid 기반 병렬 분산 처리 (cluster_num / process_num 기준)
 - HDFS gzip NDJSON 스트리밍 처리
 - Elasticsearch Bulk Chunk 업로드
 - 메모리 절약형 Generator 방식 처리
@@ -181,13 +184,17 @@ export NFS_IMG=/nfs/img
 
 ## 📋 설정 파일 (es_upload.properties)
 ```ini
+[option]
+process_num=0
+cluster_num=3
+
 [sql]
-select_hadoop_new=SELECT file_path FROM job.hadoop_new WHERE event_check IS NULL ORDER BY id LIMIT 1;
-update_hadoop_event=UPDATE job.hadoop_event SET event_check = TRUE WHERE event_check IS NULL and file_path = %s
+select_hadoop_new=SELECT file_path, txid FROM job.hadoop_new WHERE event_check IS NULL and MOD(txid, %s)= %s ORDER BY txid LIMIT 1;
+update_hadoop_event=UPDATE job.hadoop_event SET event_check = TRUE WHERE event_check IS NULL and txid = %s and file_path = %s
 
 [es]
 chunk=100
-timeout=120
+timeout=300
 ```
 
 ---
@@ -220,5 +227,6 @@ sudo systemctl status es_upload.service
 2) HDFS 파일은 반드시 **gzip NDJSON Bulk 포맷**이어야 함
 3) Elasticsearch 업로드는 **Chunk 단위로** 처리됨
 4) **업로드 완료 후 PostgreSQL 상태가 커밋됨**
-5) 처리 대상이 없으면 자동 대기 후 재시도
+5) 처리 완료 후 반드시 PostgreSQL 커밋 수행
+6) **병렬 처리 환경에서 각 서버는 다른 process_num을 사용해야하며, cluster_num 설정은 모든 노드에서 동일 해야 함**
 ---

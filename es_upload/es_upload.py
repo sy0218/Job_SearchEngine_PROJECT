@@ -1,12 +1,11 @@
-import time, gzip, io, json
-
-from elasticsearch import Elasticsearch, helpers
-
 from conf.config_log import setup_logger
 from common.job_class import Get_env, Get_properties, StopChecker
 from common.postgres_hook import PostgresHook
 from common.hdfs_hook import HdfsHook
 from common.es_hook import ElasticsearchHook
+
+import time, gzip, io, json
+from elasticsearch import Elasticsearch, helpers
 
 logger = setup_logger(__name__)
 
@@ -61,8 +60,10 @@ def _main():
         # ===============================
         # 메인 처리 루프
         # ===============================
-        while True:
+        cluster_num = int(properties["option"]["cluster_num"])
+        process_num = int(properties["option"]["process_num"])
 
+        while True:
             # ===============================
             # 종료 플래그 체크
             # ===============================
@@ -71,14 +72,18 @@ def _main():
                 break
 
             # 처리할 파일 정보 가져오기
-            row = postgresql.fetchone(properties["sql"]["select_hadoop_new"])
+            row = postgresql.fetchone(
+                properties["sql"]["select_hadoop_new"],
+                (cluster_num, process_num)
+            )
             if not row:
                 logger.info("처리할 대상 파일 없음, 대기 후 재시도..")
                 time.sleep(30)
                 continue
 
             file_path = row[0]
-            logger.info(f"==== Processing file: {file_path} ====")
+            txid = row[1]
+            logger.info(f"==== Processing file: {file_path} (txid: {txid}) ====")
 
             # ===============================
             # HDFS 데이터 읽기 및 Elasticsearch 업로드
@@ -100,16 +105,16 @@ def _main():
                                 "_source": doc
                             }
                             action = None
-                       
+
                 success, _ = es.bulk_upload(
                     actions = _bulk_generator(),
-                    chunk_size = int(properties["es"]["chunk"]) 
+                    chunk_size = int(properties["es"]["chunk"])
                 )
 
             # 처리 커밋
             postgresql.execute(
                 properties["sql"]["update_hadoop_event"],
-                (file_path,),
+                (txid, file_path),
                 commit=True
             )
 
