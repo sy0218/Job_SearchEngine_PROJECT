@@ -73,7 +73,7 @@
 | 🕵️  `hadoop_event.service` | **[`📘 hadoop_event 통합 테스트`](./docs/hadoop_event_integration_test.md)** |
 | 🔍  `ocr.service` | **[`📘 ocr 통합 테스트`](./docs/ocr_integration_test.md)** |
 | 🛢️  `warehouse.service` | **[`📘 warehouse 통합 테스트`](./docs/warehouse_integration_test.md)** |
-| 📤 `esupload.service` | **[`📘 esupload 통합 테스트`](./docs/test_esupload.md)** |
+| 📤 `esupload.service` | **[`📘 esupload 통합 테스트`](./docs/es_upload_integration_test.md)** |
 
 ---
 <br><br>
