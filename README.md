@@ -62,16 +62,16 @@
 ---
 
 ## 7️⃣ 형태소 기반 유사도 분석
-- **검색 키워드:** `"hadoop"`, `"spark"`, `"python"`, `"linux"`  
+- **검색 키워드:** `"hadoop"`, `"spark"`, `"python"`, `"linux"`, `docker`, `kafka`
 - **검색 필드:** `morph`  
-![형태소 유사도 검색](https://github.com/user-attachments/assets/e27fef89-9f82-4da4-89f4-d1554b9a5f43)  
+![형태소 유사도 검색](https://github.com/user-attachments/assets/f6d5cbcc-5ab6-4432-8c09-24ae3c06a90c)  
 
 ---
 
 ## 8️⃣ 복합 검색
 - **검색 조건 👇**  
 ```text
-company: 토스 AND (body_text : data engineer OR morph : "hadoop" AND morph : "spark" AND morph : "python" AND morph : "linux")
+company: 토스 AND (body_text : data engineer OR morph : "hadoop" OR morph : "spark" OR morph : "python" OR morph : "linux")
 ```
 - 설명 : 회사명 + 본문 키워드 + 형태소 기반 유사도 검색 복합 적용
 ![복합 검색](https://github.com/user-attachments/assets/73c80ade-6b7a-4815-8251-3fa788a56fbe)  
