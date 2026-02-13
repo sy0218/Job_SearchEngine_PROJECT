@@ -12,7 +12,7 @@
 # 🎬 **UI 시연 (Kibana 기반)**
 
 ## 1️⃣ 메인 화면
-Kibana 메인 UI 캡처  
+- Kibana 메인 UI 캡처  
 ![Kibana Main](https://github.com/user-attachments/assets/fcc1b52b-5c73-4c50-961b-af4868141542)  
 
 ---
