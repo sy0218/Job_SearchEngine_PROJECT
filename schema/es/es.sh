@@ -1,5 +1,9 @@
 #!/usr/bin/bash
 
+echo "delete template..."
+curl -XDELETE "ap:9200/_index_template/job_postings_template"
+
+echo -e "\nCreateing new template..."
 curl -XPUT "ap:9200/_index_template/job_postings_template" \
 -H "Content-Type: application/json" -d '
 {
@@ -29,7 +33,7 @@ curl -XPUT "ap:9200/_index_template/job_postings_template" \
       "properties": {
         "domain":    { "type": "keyword" },
         "href":      { "type": "keyword" },
-        "company":   { "type": "keyword" },
+        "company":   { "type": "text", "analyzer": "two_gram_analyzer" },
         "title":     { "type": "text", "analyzer": "two_gram_analyzer" },
         "msgid":     { "type": "keyword" },
         "pay":       { "type": "keyword" },
