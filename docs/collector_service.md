@@ -10,6 +10,12 @@
 ---
 <br>
 
+## 🔄 Collector Pipline
+![Pipline](https://github.com/user-attachments/assets/df021259-ddd3-4c2f-a58a-94990cbc49a6)
+
+---
+<br>
+
 ## 📂 주요 파일 구조
 | 파일명 | 설명 |
 |--------|------|
