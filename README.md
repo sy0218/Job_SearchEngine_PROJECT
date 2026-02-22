@@ -80,6 +80,7 @@
 - ✅ **디테일 크롤링 멀티프로세스 + 브라우저 객체 재사용 + Scale-Up/Scale-Out 적용! 크롤링 속도 약 10초 → 1초, 50,00건 처리 138시간 → 4.6시간 수준으로 개선!** → **[`📘 정리 문서`](./docs/crawling_scaleup_scaleout.md)**
 - ✅ **채용공고 이미지 다수로 OCR 불가피! EasyOCR 정확도 확보 + 단건 처리 & Scale-Out 전략으로 시스템 부하 최소화!** → **[`📘 정리 문서`](./docs/easyocr_tess.md)**
 - ✅ **Redis Cluster HA 구축! 3 Master + 3 Slave 고가용성 구성 & 자동 Failover 검증 완료!** → **[`📘 정리 문서`](./docs/redis_cluster.md)**
+- ✅ **Grafana + Loki + Alloy 기반 중앙 로그 수집 & 실시간 Slack 알람 구축! 서버 추가에도 유연한 운영 체계 확보** → **[`📘 정리 문서`](./docs/grafana_alloy_alert.md)**
 ---
 <br><br>
 
