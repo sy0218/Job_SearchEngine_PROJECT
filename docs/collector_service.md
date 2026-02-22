@@ -11,8 +11,7 @@
 <br>
 
 ## 🔄 Collector Pipline
-![Pipline](https://github.com/user-attachments/assets/df021259-ddd3-4c2f-a58a-94990cbc49a6)
-
+![Pipline](https://github.com/user-attachments/assets/4d2b53a0-6c41-471c-9fd3-10fd28fb7ebb)
 ---
 <br>
 
