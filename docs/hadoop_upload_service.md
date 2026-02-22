@@ -13,7 +13,7 @@
 <br>
 
 ## 🔄 Hadoop Upload Pipline
-![Pipline](https://github.com/user-attachments/assets/97bd7f62-4f57-4299-8cc5-70a9c25823ed)
+![Pipline](https://github.com/user-attachments/assets/33017c1f-6fb4-4630-81f8-f3b6ff07412f)
 
 ---
 <br>

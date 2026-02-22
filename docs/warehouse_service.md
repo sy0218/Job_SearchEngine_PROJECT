@@ -15,7 +15,7 @@
 <br>
 
 ## 🔄 Warehouse Pipline
-![Pipline](https://github.com/user-attachments/assets/1823f3a3-61b9-4293-a70b-af3f1f4a8e7f)
+![Pipline](https://github.com/user-attachments/assets/77cdbdcd-280f-4330-8266-93911d5d2672)
 
 ---
 <br>

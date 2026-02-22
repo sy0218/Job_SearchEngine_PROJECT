@@ -17,7 +17,7 @@
 <br>
 
 ## 🔄 Consumer Pipline
-![Pipline](https://github.com/user-attachments/assets/9d9312fd-1e75-42cb-81d8-8289983d18b2)
+![Pipline](https://github.com/user-attachments/assets/90ef629a-58f0-4740-93f2-90fcd8d0cbaa)
 
 ---
 <br>

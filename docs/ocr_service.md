@@ -16,7 +16,7 @@
 <br>
 
 ## 🔄 OCR Pipline
-![Pipline](https://github.com/user-attachments/assets/bb104053-ddfe-4801-ab1f-d7d7becd623b)
+![Pipline](https://github.com/user-attachments/assets/1a145b02-9152-430a-8b08-d5bd0c756c08)
 
 ---
 <br>

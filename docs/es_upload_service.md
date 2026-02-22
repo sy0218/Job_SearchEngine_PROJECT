@@ -16,7 +16,7 @@
 <br>
 
 ## 🔄 Elasticsearch Upload Pipline
-![Pipline](https://github.com/user-attachments/assets/df992894-764e-42f8-8274-1fc233619a35)
+![Pipline](https://github.com/user-attachments/assets/5f3b281d-2950-44d9-826f-5d462aeef681)
 
 ---
 <br>

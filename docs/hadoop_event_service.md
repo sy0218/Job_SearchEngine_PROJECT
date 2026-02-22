@@ -11,7 +11,7 @@
 <br>
 
 ## 🔄 Hadoop Event Pipline
-![Pipline](https://github.com/user-attachments/assets/d33defec-a208-4cd0-9a60-1cb88eda25f5)
+![Pipline](https://github.com/user-attachments/assets/edfdc065-b76c-4a94-8a2d-3b91f2ca2a6e)
 
 ---
 <br>
